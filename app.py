@@ -1,47 +1,55 @@
-from fastapi import FastAPI, File, UploadFile
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.applications.vgg19 import preprocess_input
+from fastapi import FastAPI, UploadFile, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
+from keras.models import load_model
+from keras.preprocessing import image
+from keras.applications.vgg19 import preprocess_input
 import numpy as np
-from PIL import Image
-import io
+import os
 
-# Load the pre-trained model using TensorFlow
-model = tf.keras.models.load_model("model_vgg19")
-
-# Create a FastAPI app
 app = FastAPI()
 
-@app.post("/predict/")
-async def predict_image(file: UploadFile):
+# Define the full path to the model file
+model_path = os.path.join(os.getcwd(), 'model_vgg19.h5')
+
+# Load your Keras model using a FastAPI dependency
+def load_model_dependency():
+    return load_model(model_path)
+
+def predict(image_path, model):
     try:
-        # Check if the file is an image
-        if file.content_type.startswith("image"):
-            # Read and preprocess the image
-            img = Image.open(io.BytesIO(await file.read()))
-            img = img.resize((224, 224))
-            x = np.array(img)
-            x = np.expand_dims(x, axis=0)
-            img_data = preprocess_input(x)
-
-            # Make predictions
-            classes = model.predict(img_data)
-            malignant = classes[0, 0]
-            normal = classes[0, 1]
-
-            # Determine the result
-            if malignant > normal:
-                prediction = "malignant"
-            else:
-                prediction = "normal"
-
-            return {"prediction": prediction}
-        else:
-            return {"error": "Invalid file format, please provide an image."}
+        img = image.load_img(image_path, target_size=(224, 224))
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        img_data = preprocess_input(x)
+        classes = model.predict(img_data)
+        malignant = float(classes[0, 0])  # Convert to float
+        normal = float(classes[0, 1])     # Convert to float
+        return malignant, normal
     except Exception as e:
-        return {"error": "Internal server error"}
+        raise HTTPException(status_code=400, detail="Error processing image")
 
-# Run the FastAPI app
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.post("/predict/")
+async def predict_image(file: UploadFile, model: 'Model' = Depends(load_model_dependency)):
+    try:
+        # Save the uploaded image temporarily
+        with open("temp_image.jpg", "wb") as temp_image:
+            temp_image.write(file.file.read())
+        
+        # Perform prediction on the saved image
+        malignant, normal = predict("temp_image.jpg", model)
+        
+        # Clean up the temporary image file
+        os.remove("temp_image.jpg")
+        
+        if malignant > normal:
+            prediction = 'malignant'
+        else:
+            prediction = 'normal'
+        
+        # Convert NumPy floats to Python floats
+        malignant = float(malignant)
+        normal = float(normal)
+        
+        return {"prediction": prediction, "malignant_prob": malignant, "normal_prob": normal}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
