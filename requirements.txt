@@ -1,10 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-tensorflow
-keras
 numpy
-h5py
 scikit-learn
 pandas
 Pillow
