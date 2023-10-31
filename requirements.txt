@@ -1,9 +1,8 @@
 fastapi
 uvicorn
-python-multipart
 numpy
-scikit-learn
-pandas
-Pillow
-matplotlib
-scipy
+tensorflow-cpu
+keras
+pydantic
+python-multipart
+Pillow==8.3.2
