@@ -7,7 +7,7 @@ from PIL import Image
 import io
 
 # Load the pre-trained model using TensorFlow
-model = tf.keras.models.load_model("model_vgg19_saved_model")
+model = tf.keras.models.load_model("model_vgg19")
 
 # Create a FastAPI app
 app = FastAPI()
