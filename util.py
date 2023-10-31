@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import io
 
-MODEL = tf.keras.models.load_model('C:/Users/khana/OneDrive/Desktop/cancerAPI/model_vgg19.h5')
+MODEL = tf.keras.models.load_model('model_vgg19.h5')
 CLASSES = ["The patient is healthy", "Patient has Cancer"]
 
 def load_img(img):
