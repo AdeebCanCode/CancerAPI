@@ -1,6 +1,6 @@
 fastapi
 numpy
-Pillow==10.0.1
+Pillow
 pydantic
 python-multipart
 scikit-learn
