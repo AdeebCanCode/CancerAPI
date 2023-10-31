@@ -35,7 +35,6 @@ oauthlib==3.2.2
 opt-einsum==3.3.0
 packaging==23.2
 pandas==2.1.2
-Pillow==10.0.1
 pip-tools==7.3.0
 pipreqs==0.4.13
 protobuf==4.24.3
