@@ -1,9 +1,8 @@
 fastapi
+uvicorn
 numpy
-Pillow
+tensorflow-cpu
+keras
 pydantic
 python-multipart
-scikit-learn
-starlette
-tensorflow
-uvicorn
+Pillow
