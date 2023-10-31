@@ -1,13 +1,13 @@
 from fastapi import FastAPI, File, UploadFile
-from keras.models import load_model
-from keras.preprocessing import image
-from keras.applications.vgg19 import preprocess_input
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.applications.vgg19 import preprocess_input
 import numpy as np
 from PIL import Image
 import io
 
-# Load the pre-trained model
-model = load_model('model_vgg19.h5')
+# Load the pre-trained model using TensorFlow
+model = tf.keras.models.load_model("model_vgg19_saved_model")
 
 # Create a FastAPI app
 app = FastAPI()
@@ -16,7 +16,7 @@ app = FastAPI()
 async def predict_image(file: UploadFile):
     try:
         # Check if the file is an image
-        if file.content_type.startswith('image'):
+        if file.content_type.startswith("image"):
             # Read and preprocess the image
             img = Image.open(io.BytesIO(await file.read()))
             img = img.resize((224, 224))
@@ -31,9 +31,9 @@ async def predict_image(file: UploadFile):
 
             # Determine the result
             if malignant > normal:
-                prediction = 'malignant'
+                prediction = "malignant"
             else:
-                prediction = 'normal'
+                prediction = "normal"
 
             return {"prediction": prediction}
         else:
@@ -44,4 +44,4 @@ async def predict_image(file: UploadFile):
 # Run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
